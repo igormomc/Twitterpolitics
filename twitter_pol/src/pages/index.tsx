@@ -22,7 +22,6 @@ const Home: NextPage = () => {
               {!user.isSignedIn && <SignInButton />}
               {!!user.isSignedIn && <SignOutButton />}
           </div>
-          <SignIn path="/sign-in" routing="path" signUpUrl="/sign-up" />
       </main>
     </>
   );
