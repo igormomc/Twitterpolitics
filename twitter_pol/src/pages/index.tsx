@@ -16,7 +16,6 @@ dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
     const {user} = useUser();
-    console.log("User", user)
     const [input, setInput] = useState("");
 
     const ctx = api.useContext();
@@ -28,7 +27,6 @@ const CreatePostWizard = () => {
 
 
     if (!user) return null;
-    console.log("data", user);
     return (
         <div className="flex w-full gap-3">
             <Image
