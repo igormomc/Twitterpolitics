@@ -11,16 +11,9 @@ import {TRPCError} from "@trpc/server";
 import {Simulate} from "react-dom/test-utils";
 import input = Simulate.input;
 
-const filterUserForClient = (user: User) => {
-    return {
-        id: user.id,
-        username: user.username,
-        profileImageUrl: user.profileImageUrl,
-    };
-};
-
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import {filterUserForClient} from "~/server/helpers/filterUsersForClient";
 
 // Create a new ratelimiter, that allows 10 requests per 10 seconds
 const ratelimit = new Ratelimit({
