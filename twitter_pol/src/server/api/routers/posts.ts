@@ -8,6 +8,8 @@ import {
 import {clerkClient} from "@clerk/nextjs/server";
 import type {User} from "@clerk/nextjs/dist/api";
 import {TRPCError} from "@trpc/server";
+import {Simulate} from "react-dom/test-utils";
+import input = Simulate.input;
 
 const filterUserForClient = (user: User) => {
     return {
@@ -25,13 +27,13 @@ export const postsRouter = createTRPCRouter({
 
         const users = (
             await clerkClient.users.getUserList({
-                userId: posts.map((post) => post.autherId),
+                userId: posts.map((post) => post.authorId),
                 limit: 100,
             })
         ).map(filterUserForClient);
 
         return posts.map((post) => {
-            const author = users.find((user) => user.id === post.autherId);
+            const author = users.find((user) => user.id === post.authorId);
             if (!author)
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
@@ -45,5 +47,21 @@ export const postsRouter = createTRPCRouter({
                 }
             };
         });
+    }),
+    //TODO: CHANGE EMOJI AND MAX SIZE
+    create: protectedProcedure.input(
+        z.object({
+            content: z.string().min(1).max(280),
+        })
+    ).mutation(async ({ctx, input}) => {
+        const authorId = ctx.userId;
+
+        const post = await ctx.prisma.post.create({
+            data: {
+                authorId,
+                content: input.content,
+            },
+        });
+        return post;
     }),
 });

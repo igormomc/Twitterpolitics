@@ -10,11 +10,17 @@ import dayjs from "dayjs";
 import relativeTime from 'dayjs/plugin/relativeTime'
 import Image from "next/image";
 import {LoadingPage} from "~/components/loading";
+import {useState} from "react";
 
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
     const {user} = useUser();
+    console.log("User", user)
+    const [input, setInput] = useState("");
+    const {mutate} = api.posts.create.useMutation();
+
+
     if (!user) return null;
     console.log("data", user);
     return (
@@ -29,7 +35,11 @@ const CreatePostWizard = () => {
             <input
                 placeholder="Type something"
                 className="grow bg-transparent outline-none"
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
             />
+            <button onClick={() => mutate({content: input})}>Post</button>
         </div>
     )
 }
@@ -51,7 +61,7 @@ const PostView = (props: PostWithUser) => {
                     <span>{`@${author.username}`}</span>
                     <span className="font-thin">{`· ${dayjs(post.createdAt).fromNow()}`}</span>
                 </div>
-                <span>{post.content}</span>
+                <span className="text-xl">{post.content}</span>
             </div>
         </div>
     )
@@ -59,7 +69,7 @@ const PostView = (props: PostWithUser) => {
 
 const Feed = () => {
     const {data, isLoading: postsLoading} = api.posts.getAll.useQuery();
-    if (true) return <LoadingPage/>;
+    if (postsLoading) return <LoadingPage/>;
     if (!data) return <div>Something went wrong</div>;
 
     return (
@@ -95,6 +105,8 @@ const Home: NextPage = () => {
                         </div>
                         <div>
                             {isSignedIn && <CreatePostWizard/>}
+                            {!isSignedIn && <SignOutButton/>}
+
                         </div>
                     </div>
                     <Feed/>
