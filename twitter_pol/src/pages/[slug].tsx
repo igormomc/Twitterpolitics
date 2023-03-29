@@ -9,6 +9,7 @@ import {PageLayout} from "~/components/layout";
 import Image from "next/image";
 import {LoadingPage} from "~/components/loading";
 import {PostView} from "~/components/postview";
+import {generateSSGHelper} from "~/server/helpers/ssgHelper";
 
 
 const ProfileFeed = (props: { userId: string }) => {
@@ -58,11 +59,7 @@ const ProfilePage: NextPage<{ username: string }> = ({username}) => {
 };
 
 export const getStaticProps: GetStaticProps = async (context) => {
-    const ssg = createProxySSGHelpers({
-        router: appRouter,
-        ctx: {prisma, userId: null},
-        transformer: superjson,
-    });
+    const ssg = generateSSGHelper()
 
     const slug = context.params?.slug;
     if (typeof slug !== "string") throw  new Error("no slug");
