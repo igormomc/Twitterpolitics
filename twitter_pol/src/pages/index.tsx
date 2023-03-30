@@ -12,6 +12,7 @@ import {useState} from "react";
 import toast from "react-hot-toast";
 import {PageLayout} from "~/components/layout";
 import {PostView} from "~/components/postview";
+import dayjs from "dayjs";
 
 const CreatePostWizard = () => {
     const {user} = useUser();
@@ -47,7 +48,7 @@ const CreatePostWizard = () => {
                 height={56}
             />
             <input
-                placeholder="Type something"
+                placeholder="What's happening "
                 className="grow bg-transparent outline-none"
                 type="text"
                 value={input}
@@ -95,6 +96,31 @@ const Home: NextPage = () => {
                 <meta name="description" content="💂"/>
             </Head>
             <PageLayout>
+                <div className="flex flex-col ">
+                    <div className="flex flex-col h-24 px-4">
+                        <div className="font-bold text-xl">HOME</div>
+                    </div>
+                    <div className="flex justify-center">
+                        <div className="w-1/2 border-b border-slate-400">
+                            <div className="flex justify-center space-x-2">
+                                <button
+                                    type="button"
+                                    className="inline-block w-full rounded text-gray-400 px-6 pt-2.5 pb-2 text-xs font-medium uppercase leading-normal text-xl transition duration-150 ease-in-out hover:bg-gray-700 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-gray-700">
+                                    For you
+                                </button>
+                            </div>
+                        </div>
+                        <div className="w-1/2 border-b border-slate-400 px-4">
+                            <div className="flex justify-center space-x-2">
+                                <button
+                                    type="button"
+                                    className="inline-block w-full rounded text-gray-400 px-6 pt-2.5 pb-2 text-xs font-medium uppercase leading-normal text-xl transition duration-150 ease-in-out hover:bg-gray-700 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-gray-700">
+                                    Following
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div className="flex border-b border-slate-400 p-4">
                     {!isSignedIn && (
                         <div className="flex justify-center">
