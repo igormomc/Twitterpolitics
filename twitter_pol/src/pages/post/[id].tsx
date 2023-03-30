@@ -11,7 +11,9 @@ import {LoadingPage} from "~/components/loading";
 import {PostView} from "~/components/postview";
 import Link from "next/link";
 import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
+dayjs.extend(relativeTime);
 
 const SinglePostPage: NextPage<{ id: string }> = ({id}) => {
 
@@ -19,7 +21,9 @@ const SinglePostPage: NextPage<{ id: string }> = ({id}) => {
         id
     })
     if (!data) return <div>404</div>
-
+    console.log(dayjs(data.post.createdAt))
+    const dateFormated = dayjs(data.post.createdAt).format("MMM D, YYYY")
+    const timeAtDay = dayjs(data.post.createdAt).format("h:mm A")
     return (
         <>
             <Head>
@@ -40,12 +44,41 @@ const SinglePostPage: NextPage<{ id: string }> = ({id}) => {
                     </div>
                 </div>
                 <div className="w-full bg-black"></div>
-                <PostView {...data} />
+                <div key={data.post.id} className="flex gap-3 pl-4 pb-4" >
+                    <Image
+                        src={data.author.profileImageUrl}
+                        alt="profile image"
+                        className="h-14 w-14 rounded-full"
+                        width={56}
+                        height={56}
+                    />
+                    <div className="flex flex-col">
+                        <div className="flex gap-1 text-slate-1 00">
+                            <Link href={`/@${data.author.username}`}><span>{`@${data.author.username}`}</span></Link>
+                        </div>
+                        <span className={"text-zinc-600"}>{`@${data.author.username}`}</span>
+                    </div>
+                </div>
+                <div key={data.post.id} className="flex gap-3 pl-4 pb-4 border-b border-zinc-800">
+                    <div className="flex flex-col">
+                        <div className="flex flex-col">
+                            <div className="flex gap-1 text-slate-300">
+                                <span>{data.post.content}</span>
+                            </div>
+                            <div>
+                                <span
+                                    className={"text-zinc-600 text-sm"}>
+                                    {`${timeAtDay} · ${dateFormated} · 81.1K Views`}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </PageLayout>
 
         </>
     );
 };
+
 
 export const getStaticProps: GetStaticProps = async (context) => {
     const ssg = createProxySSGHelpers({
