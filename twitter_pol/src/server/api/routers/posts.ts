@@ -109,4 +109,22 @@ export const postsRouter = createTRPCRouter({
         });
         return post;
     }),
+    updateLikesCountWithOne: protectedProcedure.input(
+        z.object({
+                postId: z.string(),
+            }
+        )).mutation(async ({ctx, input}) => {
+            const post = await ctx.prisma.post.findUnique({
+                where: {id: input.postId},
+            });
+            if (!post) throw new TRPCError({code: "NOT_FOUND"});
+            const updatedPost = await ctx.prisma.post.update({
+                where: {id: input.postId},
+                data: {
+                    likes: post.likes + 1
+                }
+            });
+            return updatedPost;
+        }
+    ),
 });

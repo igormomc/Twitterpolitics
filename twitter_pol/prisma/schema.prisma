@@ -20,7 +20,7 @@ model Post {
   createdAt DateTime @default(now())
   content   String
   authorId  String
-  Likes     Int      @default(0)
+  likes     Int      @default(0)
 
   @@index([authorId])
 }

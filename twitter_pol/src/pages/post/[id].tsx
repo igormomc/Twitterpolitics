@@ -12,18 +12,36 @@ import {PostView} from "~/components/postview";
 import Link from "next/link";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import toast from "react-hot-toast";
+import {mutate} from "swr";
 
 dayjs.extend(relativeTime);
 
 const SinglePostPage: NextPage<{ id: string }> = ({id}) => {
+    const ctx = api.useContext();
 
     const {data} = api.posts.getById.useQuery({
         id
     })
+    //update likes with mutation
     if (!data) return <div>404</div>
-    console.log(dayjs(data.post.createdAt))
     const dateFormated = dayjs(data.post.createdAt).format("MMM D, YYYY")
     const timeAtDay = dayjs(data.post.createdAt).format("h:mm A")
+
+    //update like count on post
+    const {mutate: likeMutate} = api.posts.updateLikesCountWithOne.useMutation({
+        onSuccess: () => {
+            void ctx.posts.getAll.invalidate();
+        },
+        onError: (e) => {
+            const errorMessage = e.data?.zodError?.fieldErrors.content;
+            if (errorMessage && errorMessage[0]) {
+                toast.error(errorMessage[0])
+            } else {
+                toast.error("Failed to Post! Try again later!")
+            }
+        }
+    });
     return (
         <>
             <Head>
@@ -77,7 +95,7 @@ const SinglePostPage: NextPage<{ id: string }> = ({id}) => {
                     <div className="flex flex-col">
                         <div className="flex flex-col">
                             <div className="flex gap-1 pb-4">
-                                <span className="text-sm">832</span>
+                                <span className="text-sm">{data.post.likes}</span>
                                 <span className="text-zinc-400 font-light text-sm">Like</span>
                             </div>
                         </div>
@@ -101,6 +119,7 @@ const SinglePostPage: NextPage<{ id: string }> = ({id}) => {
                         </svg>
                     </button>
                     <button type="button"
+                            onClick={() => { likeMutate({postId: data.post.id})}}
                             className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 text-zinc-500 hover:text-red-500 bg-transparent rounded-l-lg focus:z-10 focus:ring-2 focus:ring-gray-500 focus:bg-gray-900 focus:text-white">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                              stroke="currentColor" className="w-6 h-6">
