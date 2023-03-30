@@ -101,7 +101,7 @@ const Home: NextPage = () => {
                         <div className="font-bold text-xl">HOME</div>
                     </div>
                     <div className="flex justify-center">
-                        <div className="w-1/2 border-b border-slate-400">
+                        <div className="w-1/2 border-b border-zinc-800">
                             <div className="flex justify-center space-x-2">
                                 <button
                                     type="button"
@@ -110,7 +110,7 @@ const Home: NextPage = () => {
                                 </button>
                             </div>
                         </div>
-                        <div className="w-1/2 border-b border-slate-400 px-4">
+                        <div className="w-1/2 border-b border-zinc-800 px-4">
                             <div className="flex justify-center space-x-2">
                                 <button
                                     type="button"
@@ -121,7 +121,7 @@ const Home: NextPage = () => {
                         </div>
                     </div>
                 </div>
-                <div className="flex border-b border-slate-400 p-4">
+                <div className="flex border-b border-zinc-800 p-4">
                     {!isSignedIn && (
                         <div className="flex justify-center">
                             <SignInButton/>
