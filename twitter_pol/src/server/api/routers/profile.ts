@@ -11,6 +11,22 @@ import {filterUserForClient} from "~/server/helpers/filterUsersForClient";
 
 
 export const profileRouter = createTRPCRouter({
+
+    //user.create a user
+    create: protectedProcedure
+        .input(z.object({email:z.string(), name: z.string()}))
+        .query(async ({ctx, input}) => {
+                const user = await ctx.prisma.user.create({
+                    data: {
+                        name: input.name,
+                        email: input.email,
+                    },
+                });
+                return user;
+            }
+        ),
+
+
     getUserByUsername: publicProcedure.input(z.object({username: z.string()})).query(async ({input}) => {
         const [user] = await clerkClient.users.getUserList({
             username: [input.username],
@@ -24,4 +40,5 @@ export const profileRouter = createTRPCRouter({
         return filterUserForClient(user);
     }),
 });
+
 
