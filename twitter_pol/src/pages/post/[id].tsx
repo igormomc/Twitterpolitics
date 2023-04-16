@@ -7,41 +7,67 @@ import superjson from "superjson";
 import {prisma} from "~/server/db";
 import {PageLayout} from "~/components/layout";
 import Image from "next/image";
-import {LoadingPage} from "~/components/loading";
-import {PostView} from "~/components/postview";
 import Link from "next/link";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import toast from "react-hot-toast";
-import {mutate} from "swr";
+import {useEffect, useState} from "react";
+import {useMutation} from "@tanstack/react-query";
+import {SignIn, SignInButton, SignOutButton, useUser} from "@clerk/nextjs";
+
 
 dayjs.extend(relativeTime);
 
 const SinglePostPage: NextPage<{ id: string }> = ({id}) => {
     const ctx = api.useContext();
-
     const {data} = api.posts.getById.useQuery({
-        id
+        id,
     })
+
+
     //update likes with mutation
     if (!data) return <div>404</div>
     const dateFormated = dayjs(data.post.createdAt).format("MMM D, YYYY")
     const timeAtDay = dayjs(data.post.createdAt).format("h:mm A")
-
-    //update like count on post
-    const {mutate: likeMutate} = api.posts.updateLikesCountWithOne.useMutation({
-        onSuccess: () => {
-            void ctx.posts.getAll.invalidate();
-        },
-        onError: (e) => {
-            const errorMessage = e.data?.zodError?.fieldErrors.content;
-            if (errorMessage && errorMessage[0]) {
-                toast.error(errorMessage[0])
-            } else {
-                toast.error("Failed to Post! Try again later!")
-            }
+    // TODO: WHY ERROR????
+    const [likes, setLikes] = useState(data.post.like.length);
+    const authorIdStr = data.post.authorId.toString();
+    const [isPostLiked, setIsPostLiked] = useState(false);
+    useEffect(() => {
+        if (data.post.like.find((like) => like.accountId === authorIdStr)) {
+            setIsPostLiked(true);
         }
-    });
+        else {
+            setIsPostLiked(false);
+        }
+    }, [data.post.like, authorIdStr])
+
+    const {mutate: likePost} = api.posts.likePost.useMutation({
+        onSuccess: () => {
+            toast.success("Liked post")
+            setLikes(likes + 1);
+        }
+    })
+    const {mutate: removeLike} = api.posts.removeLike.useMutation({
+        onSuccess: () => {
+            toast.success("Removed like")
+            setLikes(likes - 1);
+        }
+    })
+
+    const handeLikeClick = () => {
+        if (isPostLiked) {
+            removeLike({postId: data.post.id})
+        } else {
+            likePost({postId: data.post.id})
+        }
+        setIsPostLiked(!isPostLiked);
+    }
+    const likeButtonStyle = isPostLiked ?
+        "inline-flex items-center px-4 py-2 text-sm font-medium text-red-500 bg-transparent rounded-l-lg hover:text-red-500" :
+        "inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 text-zinc-500 hover:text-red-500 bg-transparent rounded-l-lg";
+
+
     return (
         <>
             <Head>
@@ -95,13 +121,14 @@ const SinglePostPage: NextPage<{ id: string }> = ({id}) => {
                     <div className="flex flex-col">
                         <div className="flex flex-col">
                             <div className="flex gap-1 pb-4">
-                                <span className="text-sm">{data.post.likes}</span>
+                                <span className="text-sm">{likes}</span>
                                 <span className="text-zinc-400 font-light text-sm">Like</span>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className="inline-flex shadow-sm justify-evenly pl-2 pb-1 pt-1 ml-4 mr-4 border-b border-zinc-800" role="group">
+                <div className="inline-flex shadow-sm justify-evenly pl-2 pb-1 pt-1 ml-4 mr-4 border-b border-zinc-800"
+                     role="group">
                     <button type="button"
                             className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 text-zinc-500 hover:text-red-500 bg-transparent rounded-l-lg focus:z-10 focus:ring-2 focus:ring-gray-500 focus:bg-gray-900 focus:text-white">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -119,8 +146,9 @@ const SinglePostPage: NextPage<{ id: string }> = ({id}) => {
                         </svg>
                     </button>
                     <button type="button"
-                            onClick={() => { likeMutate({postId: data.post.id})}}
-                            className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 text-zinc-500 hover:text-red-500 bg-transparent rounded-l-lg focus:z-10 focus:ring-2 focus:ring-gray-500 focus:bg-gray-900 focus:text-white">
+                            onClick={() => {handeLikeClick()}}
+                            //use likeButtonStyle for like button and rest of the styling
+                            className={likeButtonStyle}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                              stroke="currentColor" className="w-6 h-6">
                             <path stroke-linecap="round" stroke-linejoin="round"

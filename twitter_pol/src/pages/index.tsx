@@ -36,22 +36,6 @@ const CreatePostWizard = () => {
         }
     });
 
-    //update like count on post
-    const {mutate: likeMutate} = api.posts.updateLikesCountWithOne.useMutation({
-onSuccess: () => {
-            void ctx.posts.getAll.invalidate();
-        },
-        onError: (e) => {
-            const errorMessage = e.data?.zodError?.fieldErrors.content;
-            if (errorMessage && errorMessage[0]) {
-                toast.error(errorMessage[0])
-            } else {
-                toast.error("Failed to Post! Try again later!")
-            }
-    }
-    });
-
-
     if (!user) return null;
     return (
         <div className="flex w-full gap-3">

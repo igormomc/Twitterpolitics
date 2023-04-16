@@ -20,9 +20,17 @@ model Post {
   createdAt DateTime @default(now())
   content   String
   authorId  String
-  likes     Int      @default(0)
+  like      Like[]
 
   @@index([authorId])
+}
+
+model Like {
+  accountId String
+  postId    String
+  post      Post   @relation(fields: [postId], references: [id])
+
+  @@id([accountId, postId])
 }
 
 // Necessary for Next auth
